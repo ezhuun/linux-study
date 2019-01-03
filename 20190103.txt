@@ -1,0 +1,148 @@
+2019.01.03
+twoseven.kr
+id: guest_new
+pw: soldesk
+
+
+ * 지난주이어 프로세스 관리 진행...
+
+ * 주요 signal
+  1) SIGHUP : 프로세스 재실행이다. 죽였다가 다시 실행하는것과 같다. 
+  2) SIGINT : 현재 프로세스 강제종료. ctrl+c 를 사용한다. 
+  9) SIGKILL : 가장 많이 사용되는 시그널로 프로세스 강제 종료이다. 프로세스가 어떤일을 하든 무조건 죽인다. 
+  물론 죽일 수 없는 예외적인 프로세스도 존재한다. 예를 들면 init 프로세스 
+  15) SIGTERM : 프로세스 종료. 
+  이 시그널을 사용하면 프로세스가 종료되지 않을 수도 있다.강제종료가 아니기 때문이다. 
+  20) SIGTSTP : 현재 프로세스 강제 중단. ctrl+z 사용 
+
+ * 프로세스 상태
+  S (sleep) : 프로세스가 cpu 자원을 기다리고 있는 상태 
+  T : 중단된 상태(CPU 자원을 할당 받을 수 없는 상태) 
+  R : Runable 또는 Running 상태 
+  Z : Zombie 상태 
+
+ * jobs를 이용하여 현재 백그라운드 프로세스 확인
+
+ * fg, bg를 이용하여 백그라운드, 포그라운드상태 변경 fg %1, bg %1
+
+
+
+----------------------------------------------------------------------------------
+ * centOS 7버전(x64) 설치
+
+ * 고정IP 설정
+ * 네트워크설정-자동연결체크-IPV4-수동연결-IP주소/네트마스크/게이트웨이 주소를 입력해준다.
+ * DNS는 8.8.8.8, 168.126.63.1   (구글,KT)
+ * ifconfig 명령을 이용해서 변경된 ip가 잘 적용되었는지 확인한다
+ * ip변경이 안되었을경우
+ * 버전7의 경우 systemctl restart NetworkManager 명령을 실행한다
+ * 버전6의 경우 service restart network 명령을 실행한다
+ * 터미널로 nslookup naver.com 이용하여 인터넷연결여부 확인
+ * 터미널 환경에서는 7v에서는 nmtui, 6v에서는 setup명령을 실행하여 설정을 진행한다
+
+
+ * centOS v6 호스트명 변경
+  - hostname : server1.example.com
+  - /etc/sysconfig/network 에서 HOSTNAME:server1.example.com 으로 변경
+  - /etc/hosts에 추가
+     - 192.168.10.10 server1.example.com server1 s1
+  - 서버 리부팅
+
+ * centOS v7 호스트명 변경
+  - hostname : server3.example.com
+  - hostnamectl set-hostname server3.example.com 명령 실행
+  - /etc/hostname 파일에 기록됨
+  - /etc/hosts에 추가
+     - 192.168.10.10 server1.example.com server1 s1
+
+ * 현재 디스크사용량 조회 df -h
+
+ * 파티션 설정 (v6) MBR형식으로 진행
+  - fdisk /dev/sdb  [-l]
+  - 주파티션은 최대4개
+  - 4개 이상 파티션을 설정을 할경우
+  - 확장파티션을 추가하여 
+  - 그 안에 논리파티션을 추가하여 사용한다
+  - 커맨드 m 도움말을 활용하여 파티션 설정 진행
+  - 기본 MBR타입으로 설정됨 2TB이상일 경우 GTP형식으로 해야함
+
+ * 파티션 설정 (v7) GTP형식으로 진행
+  - gdisk /dev/sdb
+  - 파티션 최대 128개가 지원됨
+
+ * 파티션 지우기
+  - dd if=/dev/zero of=/dev/sdb bs=512 count=1   <--주의 요망
+ 
+ * format(사용할수있도록 구조를 생성한다)
+  - mkfs -t ext4 /dev/sdb1(== mkfs.ext4 /dev/sdb1) ==>ext4 파일시스템 생성 
+  - dumpe2fs /dev/sdb1 구조생성확인
+
+
+ * 로그인시 alias 영구설정은 /자신의계정/.bashrc
+ * 로그인없이 설정파일 적용방법
+  - source .bashrc
+
+
+ * mount를 이용하여 생성된장치와 디렉토리 연결하기 (mount 할 때 중요폴더를 마운트하지 않는다)
+  -  mount -t ext4 -o rw,exec /dev/sdb1 /mnt/d2p1
+
+ * umount - 연결된 폴더를 해제한다(사용중이면 해제안됨)
+  - umount /dev/sdb1
+
+
+ * 파일복사(backup)은 속성도 같이 백업한다 (cp -rp)옵션활용
+
+
+ * 재부팅시 자동 mount 되지 않기 때문에 자동mount 시켜야한다
+  - 마운트 설정 파일 - /etc/fstab 
+    첫번째 항목 : 장치이름이나 LABEL 또는 UUID 값이 올수 있다. 
+    두번째 항목 : 마운트 포인터 
+    세번째 항목: 파일시스템 타입 
+    네번째 항목: 마운트 옵션 
+    다섯번째 항목: 0 또는1 - 백업가능성 유무로서 0(백업x) , 1(백업o) 
+    여섯번째 항목: 0 또는 1이나 2 - 부팅시 파일시스템 자동체크 여부 
+    --> 0 은 파일시스템 체크 안함 
+    ---> 1 또는 2는 파일시스템 체크함( / 파티션인경우는 1 로한다. 그외는 2로 설정) 
+
+  - blkid /dev/sdc1 에서 uuid 확인
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

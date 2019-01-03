@@ -1,0 +1,83 @@
+2018.12.27
+twoseven.kr
+id: guest_new
+pw: soldesk
+
+//==== 리눅스설치 및 기본명령어 
+
+
+* linux
+centos - 대용량 서버
+redhat enterprise linux - 상업용, 대용량서버 
+fedora - redhat enterprise linux의 시험판
+ubuntu - 개발환경, work station,  중소형서버
+suse...
+linux mint - 클라이언트용
+
+* vmware workstation(가상머신)
+v12 key : 5A02H-AU243-TZJ49-GTC7K-3C61N
+v14 key : AG352-4YED3-0852Q-LPXXT-MGKG4
+12설치후 14 업그레이드 --skip
+
+* centos 설치 패키지 목록
+설치 도중 설치할 패키지 선택은 아래와 같이 하면 됩니다.
+centos6의 설치타입을 Basic Server 로 선택한다음
+아래의 패키지가 설치되도록 체크
+----------------------------------------------
+개발 - 개발용 도구
+기반시스템 - perl 지원
+             기본
+             네트워크 파일시스템 클라이언트
+             네트워킹 도구
+             디렉토리 클라이언트
+             레거시유닉스호환성
+             성능도구
+             자바 플랫폼
+             콘솔 인터넷 도구
+             하드웨어 모니터링 도구들
+             호환성 라이브러리
+
+데스크탑 - 전부설치
+
+데이터베이스 - mysql 데이터베이스 서버
+               mysql 데이터베이스 클라이언터
+
+서버 - cifs 파일서버
+       ftp 서버
+       NFS 파일서버
+       네트워크 인프라스트럭쳐 서버
+       디렉터리 서버
+       서버 플랫폼
+       시스템관리도구
+       이메일 서버
+
+언어지원 - 한국어
+
+웹서비스 - php
+         - 웹서버
+         - 웹 서플렛 엔진
+
+응용프로그램 - 이맥스
+             - 인터넷 브라우저
+             - 인터넷 프로그램
+
+
+* centos 6.x 한영전환 : ctrl+space
+
+* localhost(호스트명)변경 : 
+1. /etc/hosts
+2. /etc/sysconfig/network
+
+* 리눅스명령어
+ - PS1, who, whoami, tty, su, ls, cd, alias, rmdir, mkdir, mv, cp, tree ...
+
+* 리눅스디렉토리구조
+ - 게시판 참조
+
+* 현재위치:/home/user1 일때,
+	 절대경로	상대경로
+/	/		../../
+log	/var/log	../../var/log
+ls	/bin/ls		../../bin/ls
+
+
