@@ -71,7 +71,8 @@ pw: soldesk
   - 파티션 최대 128개가 지원됨
 
  * 파티션 지우기
-  - dd if=/dev/zero of=/dev/sdb bs=512 count=1   <--주의 요망
+  - dd if=/dev/zero of=/dev/sdb bs=512 count=1   <--(x)
+  - 반드시 파티션제거는 fdisk 또는 gdisk를 이용하여 삭제해야 하며 rm 등을 이용해서 직접 /dev/sdb1 장치를 삭제해선 안된다
  
  * format(사용할수있도록 구조를 생성한다)
   - mkfs -t ext4 /dev/sdb1(== mkfs.ext4 /dev/sdb1) ==>ext4 파일시스템 생성 
