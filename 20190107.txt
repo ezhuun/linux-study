@@ -1,0 +1,198 @@
+2019.01.07
+twoseven.kr
+id: guest_new
+pw: soldesk
+
+
+ * 네트워크 설정 확인
+  - netstat -rn (ip/gateway 확인)
+  - cat /etc/resolv.conf (dns확인)
+  - cat /etc/sysconfig/network-scripts/ifcfg-eth0~1 (설정된 네트워크 확인)
+  - netstat -ntp (연결되어있는 ip주소 확인)
+
+ * 변경사항 적용
+  - 네트워크 설정 변경시 service network restart 명령 실행
+
+ * HOSTNAME 변경
+  - 1) cat /etc/sysconfig/network (hostname변경)
+  - 2) cat /etc/hosts(hostname추가)
+
+ * 원격에서 서로 다른 서버로 접속
+  - ssh `계정`@`ipaddress`
+  - ipaddress 대신 이름을 통해 접속방법 : /etc/hosts에 다른서버 정보를 입력해준다
+ 
+ * ip2개 부여하는방법
+  - ifconfig eth0:1 192.168.5.11 netmask 255.255.255.0
+  - 재부팅시 적용이 안되므로  /etc/sysconfig/network-scripts/ifcfg-eth* 파일을 생성해줘야함
+  - cp ifcfg-eth0 ifcfg-eth0:1
+  - DEVICE=eth0:1 변경
+  - UUID # 주석처리
+  - IPADDR=192.168.5.x 변경
+  - 저장 후 종료
+  - x윈도우 상에서 NetworkManager에서 변경할 경우 ifcfg-eth파일안에 정보가 추가된다.
+  - x윈도우에서 변경한 경우 확인방법은 ip addr show 명령으로 ip주소확인
+
+
+ * 서버셋팅실습(네임서버)
+  - server1 : dns server  (ns.server.co.kr) 192.168.5.254
+  - server2 : httpd, vsftpd, sshd  (www.shop.com shop.com)
+
+  * server1 : DNS Server
+    - Primary DNS (반드시 구성해야함)
+    - Secondary DNS
+
+     yum install bind (bind 설치)
+     //yum install caching-nameserver
+    - /etc/named.conf(dns 설정파일)
+     cp named.conf named.conf.orig (원본파일백업)
+     vi named.conf
+     listen-on port 53 { 127.0.0.1; }; local 주소로 접속했을때만 응답 127.0.0.1 을 dns ip 주소로 변경해야 한다. listen-on port 53 { any; };
+     listen-on-v6 port 53 { ::1; }; 이부부은 주석 처리 //listen-on-v6 port 53 { ::1; };
+     directory "/var/named"; ; 세부설정을 위한 디렉토리경로 
+     allow-query { localhost; }; local 의 query 에 대해서만 응답 localhost 를 any 로 변경해야 한다.  allow-query { any; };
+     변경내용 저장
+     cp /etc/named.rfc1912.zones named.rfc1912.zones.orig (named.conf에 include되는 파일원본을 백업)
+     vi named.rfc1912.zones 파일 맨 아래에 
+     ============================ named.rfc1912.zones
+     //config for forward domain zone
+     zone "server.co.kr" IN {
+          type master;
+          file "server.hosts";
+     };
+     //config for reverse domain zone
+     zone "5.168.192.in-addr.arpa" IN{
+          type master;
+          file "192.168.5.rev";
+     };
+     ============================
+     위 내용을 추가한다
+     /var/named/server.hosts (파일을 생성)
+     cp named.localhost server.hosts
+     vi server.hosts
+     ============================ server.hosts
+     $TTL 1D
+     @       IN SOA  ns.server.co.kr.        kildong.daum.net. (
+                                         0       ; serial
+                                         1D      ; refresh
+                                         1H      ; retry
+                                         1W      ; expire
+                                         3H )    ; minimum
+
+             IN NS   ns.server.co.kr.
+     ns      IN A    192.168.5.200
+     www     IN A    192.168.5.11
+     blog    IN A    192.168.5.12
+     @       IN A    192.168.5.11
+     ============================
+     위 내용으로 변경을 한뒤 저장한다
+     cp server.hosts 192.168.5.rev
+     vi 192.168.5.rev
+     ============================ 192.168.5.rev
+     $TTL 1D
+     @       IN SOA  ns.server.co.kr.        kildong.daum.net. (
+                                        0       ; serial
+                                        1D      ; refresh
+                                        1H      ; retry
+                                        1W      ; expire
+                                        3H )    ; minimum
+
+             IN NS   ns.server.co.kr.
+     200     IN PTR  ns.server.co.kr.
+     11      IN PTR  www.server.co.kr.
+     11      IN PTR  server.co.kr.
+     12      IN PTR  blog.server.co.kr.
+     ============================
+     위 내용으로 변경을 한뒤 저장한다
+     chgrp named * (파일 그룹권한을 named로 변경)
+     네트워크 설정에서 eth0 ip4에 192.168.5.200를 추가한다(x윈도우의 네트워크매니저에서 설정)
+     service network restart
+     ip addr show eth0
+     pgrep -fl named
+     service named start
+     pgrep -fl named
+     vi /etc/resolv.conf
+     ============================ /etc/resolv.conf
+     nameserver 192.168.5.200
+     ============================
+     기존 nameserver내용을 지우고 위 내용으로 수정
+
+  * server2 : httpd, vsftpd, sshd  (www.shop.com shop.com)
+     yum grouplist
+     yum groupinfo "웹 서버"
+     --> 설치안되어잇다면 yum groupinstall "웹 서버"
+     --> "MySQL 데이터베이스 서버" 설치되어있는지 확인
+     service mysqld start
+     db<->웹서버는 기본적으로 연동이됨
+
+
+  * 아파치 설정파일
+    - grep --color DirectoryIndex /etc/httpd/conf/httpd.conf | grep -v '#'
+    - 기본 웹 다이렉토리 : /var/www/html/
+
+
+  * 가상호스트 지정 (한대의 서버에 여러대의 서버처럼 사용할때)
+    - mkdir /var/vhosts
+    - cd /var/vhosts
+    - mkdir blog.server.co.kr
+    - mkdir www.server.co.kr
+    - cd /etc/httpd/conf.d
+    - vim blog.server.co.kr-vhost.conf   (httpd.conf 파일에서 *.conf파일을 참조한다)
+    - 아래 내용을 입력한다
+	====================
+	<VirtualHost 192.168.5.11:80>
+	        ServerAdmin kildong@server.co.kr
+	        ServerName www.server.co.kr
+	        ServerAlias server.co.kr
+	        DocumentRoot /var/vhosts/www.server.co.kr
+	</VirtualHost>
+	--------------------
+    - getenforce (방화벽과 달리 아파치웹서버를 다른데로 설정햇을때 막아주는것) 명령 실행햇을때 permissive가 나와야함
+    	- semanage fcontext -a -t httpd_sys_content '/var/vhost(/.*)?'  --> 풀어주는명령어, 패키지가 설치되어잇어야 함
+	- setenforce 0 (테스트서버라서 잠시 풀어놓음)
+	- /etc/selinux/config 파일에서 SELINUX=permissive로 변경하면 리부팅시에도 유지된다
+
+
+  * 새주소 추가해보기
+   - /etc/named.rfc1912.zones에 새 도메인 추가
+   - /var/named/도메인.hosts파일을 생성한다(기존파일을 복사해서 사용하면 편하다)
+   - /var/named/192.168.5.rev에 추가한다
+   - chgrp named *  그룹권한을 변경한다
+   - service named restart
+   - 아파치실행할 서버에서 위에서 추가한 ip를 추가한다
+   - cd /etc/httpd/conf.d
+   - vhost.conf 파일 생성 및 virtualhost 내용 입력
+   - 위 파일의 documentroot경로로 이동하여 디렉토리 생성
+   - mkdir /var/vhosts/mkdir `폴더명`
+
+   
+
+
+  * 새로 계정추가하여 /home 파일을 아파치 기본디렉토리로 등록방법
+   useradd `계정명`
+   cd /etc/httpd/conf
+   vi httpd.conf
+   UserDir disabled 주석처리
+   UserDir public_html 주석해제
+   service httpd restart
+   chmod o=rx /home/`계정명`
+   service httpd restart
+
+  * ftp 설정
+   rpm -q vsftpd
+   service vsftpd start
+   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
