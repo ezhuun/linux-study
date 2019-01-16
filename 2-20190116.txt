@@ -1,0 +1,70 @@
+2019.01.16
+
+ * 지난주이어 클래스 
+
+public class ArrayParameter {
+	int i = 0;
+	
+	static void replaceSpace(char a[]) {
+		for (int i = 0; i < a.length; i++) {
+			a[i] = '-';
+		}
+	}
+	
+	static void printCharArray(char a[]) {
+		for (int i = 0; i < a.length; i++) {
+			System.out.print(a[i]);
+		}
+		System.out.println();
+	}
+	
+	public static void main(String[] args) {		
+		char c[] = { 'T', 'h', 'i', 's', ' ', 'i', 's', ' ', 'a', ' ', 'p', 'e', 'n', 'c', 'i', 'l', '.' };
+
+		printCharArray(c);		//출력용
+		replaceSpace(c);		//배열 값 변경
+		printCharArray(c);		//출력
+	}
+
+}
+=====================================================
+
+ * 메인 c와 메소드에서 호출된 a는 서로 해쉬코드가 같기 때문에 메인의 c의 값이 변경된것을 볼 수 있다.
+   (String은 예외:String은 자동으로 new String("str"); 해주기 때문)
+
+ * 변수의 종류
+   - 멤버변수 (인스턴스변수, 필드)
+	: heap메모리 할당
+	: 메소드 밖에 선언되는 변수
+	: 변수 선언시 값을 주지 않아도 특정 값으로 초기화
+   - 지역변수
+	: stacp메모리 할당
+	: 메소드 내에 선언되는 변수
+	: 초기화를 해야 사용가능
+   - static 변수
+	: data메모리 할당
+	: 메소드를 선언할때 사용되는 변수
+
+
+ * Call By Value : 값에 의한 호출
+   - 보통 숫자계열값을 메소드 호출되는 경우
+   - 기본형타입으로 전송할 경우
+
+ * Call By Reference: 참조값에 의한 호출(해쉬코드)
+   - 참조값(Hash Code)을 전달한 객체는 자신의 참조값이 전달됨으로 값의 변화가 발생할 수 있고 heap memory를 공유한다
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
