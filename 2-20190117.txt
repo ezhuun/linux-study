@@ -1,0 +1,303 @@
+2019.01.17
+
+ * 도형 넓이, 둘레 구하기 실습
+==============================================================================================================
+package coding.day07;
+
+import java.text.DecimalFormat;
+
+//메인 클래스
+public class Shapes {
+
+	public static void main(String[] args) {
+
+		// 객체 생성
+		Circle circle = new Circle();
+		Triangle triangle = new Triangle();
+		Rectangle rectangle = new Rectangle();
+
+		// circle
+		circle.setA(10);
+		circle.print();
+
+		// triangle
+		triangle.setA(5);
+		triangle.setB(8);
+		triangle.setC(5);
+		triangle.print();
+
+		// rectangle
+		rectangle.setA(10);
+		rectangle.setB(7);
+		rectangle.print();
+	}
+
+}
+
+// 원 클래스
+class Circle {
+	private double a; // 지름
+	private double area; // 넓이
+	private double perimeter; // 둘레
+
+	// ==================
+	// SET / GET
+	// ------------------
+	public void setA(double a) {
+		this.a = a;
+	}
+
+	public void setArea(double area) {
+		this.area = area;
+	}
+
+	public void setPerimeter(double perimeter) {
+		this.perimeter = perimeter;
+	}
+
+	public double getA() {
+		return this.a;
+	}
+
+	public double getArea() {
+		return this.area;
+	}
+
+	public double getPerimeter() {
+		return this.perimeter;
+	}
+
+	// ==================
+	// "원"의 넓이
+	// 원의 넓이 = 반지름 * 반지름 * 3.14
+	// ------------------
+	public void area() {
+		this.setArea((this.getA() / 2) * (this.getA() / 2) * Math.PI);
+	}
+
+	// ==================
+	// "원"의 둘레
+	// 원의 둘레 = 반지름 * 2 * 3.14
+	// ------------------
+	public void perimeter() {
+		this.setPerimeter((this.getA() / 2) * 2 * Math.PI);
+	}
+
+	// ==================
+	// 출력 메소드
+	// ------------------
+	public void print() {
+		DecimalFormat df = new DecimalFormat("###.00");
+
+		this.perimeter();
+		this.area();
+
+		System.out.println("Circle \n멤버변수 [diameter : " + this.getA() + " / area : " + this.getArea() + " / a : "
+				+ this.getPerimeter() + "]");
+		System.out.println("원의 넓이 : " + df.format(this.getArea()));
+		System.out.println("원의 둘레 : " + df.format(this.getPerimeter()));
+		System.out.println();
+	}
+}
+
+// 삼각형 클래스
+class Triangle {
+	private double a;
+	private double b;
+	private double c;
+	private double area; // 넓이
+	private double perimeter; // 둘레
+
+	// ==================
+	// SET / GET
+	// ------------------
+	public void setA(double a) {
+		this.a = a;
+	}
+
+	public void setB(double b) {
+		this.b = b;
+	}
+
+	public void setC(double c) {
+		this.c = c;
+	}
+
+	public void setArea(double area) {
+		this.area = area;
+	}
+
+	public void setPerimeter(double perimeter) {
+		this.perimeter = perimeter;
+	}
+
+	public double getA() {
+		return this.a;
+	}
+
+	public double getB() {
+		return this.b;
+	}
+
+	public double getC() {
+		return this.c;
+	}
+
+	public double getArea() {
+		return this.area;
+	}
+
+	public double getPerimeter() {
+		return this.perimeter;
+	}
+
+	// ==================
+	// "삼각형"의 넓이
+	// 넓이 = Math.sqrt(s*(s-a)*(s-b)*(s-c)) s = (a+b+c)/2
+	// ------------------
+	public void area() {
+		double s = this.getPerimeter() / 2;
+		this.setArea(Math.sqrt(s * (s - this.getA()) * (s - this.getB()) * (s - this.getC())));
+	}
+
+	// ==================
+	// "삼각형"의 둘레
+	// ------------------
+	public void perimeter() {
+		this.setPerimeter((this.getA() + this.getB() + this.getC()));
+	}
+
+	// ==================
+	// 출력 메소드
+	// ------------------
+	public void print() {
+		DecimalFormat df = new DecimalFormat("###.00");
+
+		this.perimeter();
+		this.area();
+
+		System.out.println("Triangle \n멤버변수 [a : " + this.getA() + " / b : " + this.getB() + " / c : " + this.getC()
+				+ " / area : " + this.getArea() + " / perimeter : " + this.getPerimeter() + "]");
+		System.out.println("삼각형의 넓이 : " + df.format(this.getArea()));
+		System.out.println("삼각형의 둘레 : " + df.format(this.getPerimeter()));
+		System.out.println();
+	}
+}
+
+// 직사각형 클래스
+class Rectangle {
+	private double a; // 가로
+	private double b; // 세로
+	private double area; // 넓이
+	private double perimeter; // 둘레
+
+	// ==================
+	// SET / GET
+	// ------------------
+	public void setA(double a) {
+		this.a = a;
+	}
+
+	public void setB(double b) {
+		this.b = b;
+	}
+
+	public void setArea(double area) {
+		this.area = area;
+	}
+
+	public void setPerimeter(double perimeter) {
+		this.perimeter = perimeter;
+	}
+
+	public double getA() {
+		return this.a;
+	}
+
+	public double getB() {
+		return this.b;
+	}
+
+	public double getArea() {
+		return this.area;
+	}
+
+	public double getPerimeter() {
+		return this.perimeter;
+	}
+
+	// ==================
+	// "직사각형"의 넓이
+	// 넓이 = 가로 * 세로
+	// ------------------
+	public void area() {
+		this.setArea(this.getA() * this.getB());
+	}
+
+	// ==================
+	// "직사각형"의 둘레
+	// 둘레 = (가로+세로) * 2
+	// ------------------
+	public void perimeter() {
+		this.setPerimeter((this.getA() + this.getB()) * 2);
+
+	}
+
+	// ==================
+	// 출력 메소드
+	// ------------------
+	public void print() {
+		DecimalFormat df = new DecimalFormat("###.00");
+
+		this.perimeter();
+		this.area();
+
+		System.out.println("Rectangle \n멤버변수 [a : " + this.getA() + " / b : " + this.getB() + " / area : "
+				+ this.getArea() + " / perimeter : " + this.getPerimeter() + "]");
+		System.out.println("사각형의 넓이 : " + df.format(this.getArea()));
+		System.out.println("사각형의 둘레 : " + df.format(this.getPerimeter()));
+		System.out.println();
+	}
+}
+
+
+==============================================================================================================
+
+
+ * String 객체의 특성
+
+  - 클래스를 객체화할때 new를 사용하지만 String은 사용하지 않아도 된다.(String name = "홍길동";) 
+  - 메모리상에서 같은 문자열은 공유한다
+    String name = "홍길동"; 
+    String str = "홍길동";    
+    name hashcode와 str hashcode는 같다
+
+
+
+ * 메소드 오버로딩(Method Overloading) 
+    : 같은 클래스 내에서 같은 이름의 메소드를 여러개 선언하는 것.
+    : 매개변수의 갯수나 타입으로 인식
+
+ * 생성자
+    : 클래스 이름과 같아야 한다
+    : return Type이 없다
+    : new를 이용하여 객체를 메모리에 할당한 후 할당된 메모리를 특정 값으로 초기화하는 역할을 한다
+    : 생성자가 없을때 기본생성자를 자동으로 만들어준다
+
+ * static 변수(정적 변수, 클래스 변수), static 메소드 --★
+    : 객체를 만들지 않고 변수나 메소드의 사용이 가능
+    : 보통 간단한 값의 처리시 주로 이용
+    : 일반적인 클래스는 new를 이용하여 메모리를 할당해서 사용하나, static 요소들은 클래스가 JVM에 인식될때 new 없이 자동으로 메모리가 할당됨.
+    : 최초 1회만 메모리 할당을 받고 모든 객체들이 공유함
+    : static변수는 클래스명으로 접근을 권장
+
+
+ * final 변수
+    : 값을 변경할 수 없다
+    : 값을 고정할 필요가 있는 코드와 같은 형태의 데이터에 사용
+
+
+
+
+
+
