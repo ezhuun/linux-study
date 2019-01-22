@@ -1,0 +1,80 @@
+2019.01.22
+
+
+ * 지난주이어 메소드오버라이딩, 동적할당 실습
+
+ * 클래스: 상속 관계에서의 생성자, this, super, this(), super()
+
+
+ * 생성자의 역할 : 객체생성시 자동으로 호출되는 메소드, 주로 초기화 작업을 한다
+
+ * 상속관계의 클래스에는 부모의 생성자를 호출하는 메소드가 숨겨져있다.
+
+	public class ConstructorEx {
+		
+		public static void main(String[] args) {
+			C c;
+			c = new C();
+		}
+		
+	}
+	
+	
+	class A{
+		public A(){
+			super();
+			System.out.println("생성자 A");
+		}
+	}
+	class B extends A{
+		public B(){
+			super();
+			System.out.println("생성자 B");
+		}
+	}
+	class C extends B{
+		public C(){
+			super();
+			System.out.println("생성자 C");
+		}
+	}
+================================================================
+결과값
+생성자 A
+생성자 B
+생성자 C
+
+
+질문 1> 서브 클래스의 인스턴스가 생성될 때 서브 클래스의 생성자와 슈퍼
+           클래스의 생성자가 모두 실행되는가? 아니면 서브 클래스의 생성자만
+           실행되는가?  =모두
+
+
+질문 2> 서브 클래스의 인스턴스가 생성될 때 서브 클래스의 생성자와 슈퍼
+           클래스의 생성자의 실행 순서는 어떻게 되는가? =슈퍼-서브
+
+
+
+* 내부객체변수
+   : this  - 메소드안에서 자신의 객체를 나타내는 객체변수
+   : super - 메소드안에서 상위 클래스 객체를 나타내는 객체변수
+
+
+ * this(), super() 생성자호출
+ * this.*, super.*()  메소드/멤버변수 호출
+
+
+
+ * 추상 클래스(abstract class) 
+   : new를 통해 객체생성을 할 수 없다
+   : 특정제한자 abstract으로 선언
+   : 추상클래스 내에는 추상메소드를 0개 이상가질 수 있다
+   : 추상 메소드는 "서브 클래스에서 반드시 오버라이딩"하여 구현해야 한다
+   : 실제 개발시에는 추상메소드보다는 인터페이스를 자주 이용한다
+
+   abstract class DObject {
+        public DObject next;
+
+       public DObject() { next = null;}
+       abstract public void draw() ;
+   }
