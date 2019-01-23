@@ -1,0 +1,32 @@
+2019.01.23
+
+ * final 클래스
+    : final클래스는 상속될 수 없다
+
+ * final 메소드
+    : 자식 클래스가 오버라이딩 할 수 없다
+
+ * 상수 선언 : public static final int 변수명 = 값;
+   - public: 누구나 사용할 수 있음 
+   - static: 객체를 만들지 않고도 사용 할 수 있음 
+   - final: 변수의 값을 변경할 수 없음 
+   - int: 정수를 저장함 
+
+
+ * 인터페이스 (Interface)
+   : 클래스간의 중간교류역할
+   : 상수와 추상 메소드로만 이루어짐
+   : 메소드의 내용을 정의하는 "{}" 없음
+   : 추상 메소드에 abstract를 사용하지 않아도 됨
+   : 모든 추상 메소드 앞에 public으로 가정
+   : 외부에 공개할 메소드를 등록하는 목적으로도 사용
+   : 상속이 아닌 구현을 통해 인터페이스를 사용한다
+
+     ex)
+	public interface Car{
+		int MAXIMUM_SPEED = 260;  //상수필드선언
+	  	int moveHandle(int degree);   //abstract 생략가능
+		int changeGear(int gear);  //public 생략가능
+	}
+	
+	public class TestClass implements Car{}
