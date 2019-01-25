@@ -1,0 +1,451 @@
+2019.01.25
+
+ * 지난시간이어 입출력스트림
+
+>>> BufferedReader를 이용한 문자 입력받기 
+    - 키보드 또는 파일에서 한줄 단위로 입력을 받습니다. 
+    - readLIne()를 이용합니다. 
+import java.io.*; 
+public class ReadFromFile { 
+public static void main(String[] args) { 
+String fname="src\\package명\\ReadFromFile.java"; 
+
+File f = new File(fname); 
+String path = f.getAbsolutePath(); 
+System.out.println(path); 
+try{ 
+FileReader fr=new FileReader(f); 
+BufferedReader br=new BufferedReader(fr); 
+StringBuffer sb=new StringBuffer(); 
+String s=""; 
+      while((s=br.readLine())!=null){ 
+           sb.append(s+"\n"); 
+      } 
+s=sb.toString(); 
+System.out.println(s); 
+br.close(); 
+fr.close(); 
+}catch(Exception ee){ 
+System.out.println(ee.toString()); 
+} 
+} 
+}
+
+
+>>> LineNumberReader를 이용한 문자 입력받기 
+   - BufferedReader와 비슷하며 LineNumber를 알려줍니다.
+
+ 
+import java.io.*; 
+public class ReadFromLine { 
+public static void main(String[] args) { 
+try{ 
+      System.out.println("데이타를 입력하세요"); 
+InputStreamReader isr=new InputStreamReader(System.in); 
+LineNumberReader br=new LineNumberReader(isr); 
+StringBuffer sb=new StringBuffer(); 
+String s=""; 
+while(!(s=br.readLine()).equals("999")){// 
+     sb.append( br.getLineNumber()+" "+s+"\n"); 
+} 
+System.out.println(sb.toString()); 
+br.close(); 
+isr.close(); 
+}catch(Exception ee){ 
+System.out.println(ee.toString()); 
+} 
+} 
+} 
+
+
+
+
+
+>>> File 객체 및 Stream객체 사용 
+   - 파일, 디렉토리에 대한 정보를 제공하는 클래스 
+   - 키보드에서 파일명 입력받기 
+
+import java.io.BufferedReader; 
+import java.io.File; 
+import java.io.InputStreamReader; 
+
+public  class FileDirDemo1 { 
+  public static void main(String args[]) { 
+    /* 
+     * System.in: 키보드 standard InputStream 
+     * new InputStreamReader(System.in): 입력을 받아 문자 인코딩을 실행 
+     * new BufferedReader();: 입력받은 문자를 버퍼에 저장하는 역활과 
+     * 저장소 역활을 함 
+     *  
+     *                                          System.in 
+     *                                          ↑   
+     *                        InputStreamReader(System.in) 
+     *                        ↑ 
+     * new BufferedReader(new InputStreamReader(System.in)) 
+     *  
+     * Call By Reference 사용 
+     * */ 
+      BufferedReader in = new BufferedReader(new InputStreamReader(System.in)); 
+      System.out.print("디렉토리를 입력해 주세요: "); 
+       
+      String directory=""; 
+      try { 
+          directory = in.readLine(); //키보드로부터 입력, Lock 
+      } catch (Exception e) { 
+        System.out.println("Error: " + e.toString()); 
+      }     
+       
+      //File, Directory 관련 처리 
+      File f1 = new File(directory); 
+
+      //디렉토리인지 검사 
+      if (f1.isDirectory()) { 
+        System.out.println("검색 디렉토리 " + directory); 
+        System.out.println("============================="); 
+        String s[] = f1.list(); //디렉토리안에 있는 파일/디렉토리 목록 
+
+        for (int i=0; i < s.length; i++) { 
+            //디렉토리와 파일 조합 
+            File f = new File(directory + "/" + s[i]); 
+         
+            if (f.isDirectory()) { //디렉토리이면 
+                System.out.println(s[i] + " : 디렉토리"); 
+            } else { //파일이면 
+                System.out.println(s[i] + " : 파일"); 
+            } 
+        } 
+    } else { 
+      System.out.println("지정한 " + directory + " 는 디렉토리가 아님"); 
+    } 
+  } 
+} 
+
+
+
+
+>>>> FileInfo.java, 파일의 정보 출력 
+
+import java.io.*; 
+
+public class FileInfo { 
+   
+    public static void main (String args[]) { 
+        System.out.print("파일 이름을 넣으세요: "); 
+     
+        String name= ""; 
+     
+        try { 
+            BufferedReader in = new BufferedReader(new InputStreamReader(System.in)); 
+            //                  메모리 저장 기능(입력 기능(키보드 장치를 지정함))  
+            name = in.readLine();//한 라인을 읽어 들임       
+        } 
+        catch (Exception e) { 
+            System.out.println("Error: " + e.toString()); 
+        } 
+
+        // file 클래스 객체 생성 
+        File file = new File(name); 
+        if (file.exists()) { 
+            System.out.println("파일 이름 : " + file.getName()); 
+            System.out.println("상대 패스 : " + file.getPath()); 
+            System.out.println("절대 패스 : " + file.getAbsolutePath()); 
+            System.out.println("쓰기 가능 : " + file.canWrite()); 
+            System.out.println("읽기 가능 : " + file.canRead()); 
+            System.out.println("파일 길이 : " + file.length() + " 바이트"); 
+        } 
+        else 
+            System.out.println("해당 파일은 존재하지 않습니다."); 
+    } 
+} 
+
+
+
+
+>>>   파일에 문장 기록하고 읽어 오기 
+   - readLine()메소드는 반드시 Exception 처리해야합니다. 
+
+>>>>> FileWriterDemo.java 
+
+import java.io.*; 
+public class FileWriterDemo { 
+  public static void main(String args[]) { 
+    String source = "JAVA\n" 
+                    + "JSP\n" 
+                    + "EJB\n" 
+                    + "OJT\n"     
+                    + "가나다\n"; 
+
+    String fname= ""; 
+     
+    //저장할 파일명 입력 
+    //-------------------------------------------------- 
+    try { 
+        System.out.print("저장할 파일명을 입력하세요: "); 
+        BufferedReader in = new BufferedReader(new InputStreamReader(System.in)); 
+        fname = in.readLine();//한 라인을 읽어 들임       
+    } 
+    catch (Exception e) { 
+        System.out.println("Error: " + e.toString()); 
+    } 
+    //-------------------------------------------------- 
+     
+    try{ 
+        //파일 쓰기 객체 생성 
+        FileWriter fw = new FileWriter(fname); 
+        fw.write(source);//파일에 기록 
+        fw.close();      //메모리 해제 
+        System.out.println("파일을 저장했습니다."); 
+         
+        //파일을 읽어오는 객체 생성 
+        FileReader fr = new FileReader(fname); 
+        int i; // 하나의 문자 코드를 저장합니다. 
+        System.out.println("파일을 읽어 옵니다.");  
+        //한 문자를 읽어 들임, 파일의 끝이라면 -1을 읽음 
+        while((i = fr.read()) != -1 ) { 
+          System.out.print(" (" + i + ")");           
+          System.out.print((char)i); 
+        } 
+        fr.close();         
+    }catch(Exception e){ 
+        System.out.println(e.toString()); 
+    } 
+  } 
+} 
+
+
+
+
+>>>>  파일 복사 
+    - 입.출력 stream객체를 이용해서  파일을 복사합니다. 
+
+import java.io.File; 
+import java.io.FileReader; 
+import java.io.FileWriter; 
+
+public class CopyFile{ 
+    public static void main(String[] args) { 
+        try{ 
+            // File 객체를 프로그램 실행시의 인자를 이용하여 생성한다. 
+            // 예를 들어, java CopyFile test.txt output.txt  
+            // test.txt -> args[0] 
+            // output.txt -> args[1] 
+             
+            //파라미터를 2개를 받았는지 검사 
+            if (args.length != 2) { 
+                System.out.println ("---------------- 에러 발생 ----------------"); 
+                System.out.println ("usage: java CopyFile <원본파일명> <대상파일명>"); 
+                 
+                //비 정상적인 종료: 0보다 큰값을 지정 
+                System.exit (1);  //프로그램 종료 
+            }         
+             
+            //파일 객체 생성 
+            File inputFile = new File(args[0]);//소스파일명 
+            File outputFile = new File(args[1]);//생성될 파일명 
+             
+            // FileReader는 데이터를 읽어오는 역활을 합니다. 
+            FileReader in = new FileReader(inputFile); 
+             
+            // FileWriter는 쓰는 역활을 합니다. 
+            FileWriter out = new FileWriter(outputFile); 
+         
+            int c; 
+             
+            // FileReader 클래스 객체에서 파일의 끝까지 읽어서 
+            // FileWriter 클래스에 기록을 합니다. 
+            // 한문자를 읽어 들임, 문자는 내부적으로 문자코드에 기반한 
+            // 숫자형태로 변경되어 처리됩니다. 
+            // EOF -1 
+            while ((c = in.read()) != -1){ 
+                //파일에 출력 
+                out.write(c); 
+            } 
+                     
+            System.out.println("파일 복사가 완료되었습니다."); 
+            //스트림을 닫아줍니다. 
+            in.close(); 
+            out.close(); 
+             
+        }catch(Exception e){ 
+            System.out.println(e.toString()); 
+        } 
+    } 
+} 
+
+
+
+
+
+>>>> BufferedReader, PrintWriter를 이용한 파일 읽고 쓰기 
+
+import java.io.*; 
+public class ReadAndWriteFromFile{ 
+   public void readFile(String fn) throws IOException{ 
+FileReader fr=new FileReader(fn); 
+BufferedReader br=new BufferedReader(fr); 
+StringBuffer sb=new StringBuffer(); 
+String temp=""; 
+while((temp=br.readLine())!=null){ 
+sb.append(temp+"\n"); 
+} 
+System.out.println(sb.toString()); 
+br.close(); 
+fr.close(); 
+ 
+    }
+
+    public void readnwrite(String fn, boolean append) throws IOException{ 
+String s=null; 
+FileWriter fw=new FileWriter(fn,append);//append true 
+PrintWriter pw=new PrintWriter(fw);//flush false 
+//PrintWriter pw=new PrintWriter(fw, true);//flush true  
+while(!(s=readbuff()).equals("999")){ 
+pw.println(s); 
+pw.flush();//PrintWriter(fw, true)일 때는 필요없다. 
+} 
+pw.close(); 
+fw.close(); 
+    }
+
+    public String readbuff() throws IOException{ 
+InputStreamReader isr=new InputStreamReader(System.in); 
+BufferedReader br=new BufferedReader(isr); 
+return br.readLine(); 
+    } 
+   public static void main(String[] args){ 
+String fname="aaa.txt"; 
+ReadAndWriteFromFile baw=new ReadAndWriteFromFile(); 
+try{ 
+baw.readnwrite(fname,false);//clear 
+//baw.readnwrite("aaa.txt",true);//append 
+baw.readFile(fname); 
+}catch(Exception ex){ 
+System.out.println(ex); 
+} 
+    } 
+} 
+
+
+
+
+
+
+
+
+>>>>  ObjectInputStream & ObjectOutputStream
+-  인스턴스가 파일에 저장될때 저장을 위해 거치는과정을가리켜 직렬화(serialization)이라하고,
+    그반대의 과정을 가리켜 역직렬화(deserialization) 이라한다 
+
+-  직렬화의대상이되는인스턴스의클래스는java.io.Seiralizable인터페이스를구현해야한다.
+-  이인터페이스는 직렬화의대상임을표시 하는인터페이스이며 메소드가존재하지 않다.
+
+>>>> CircleTest.java
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+ 
+class Circle implements Serializable{
+int xPos;
+int yPos;
+double rad;
+ 
+Circle(int x, int y, double r){
+xPos = x;
+yPos = y;
+rad = r;
+}
+public void showCircleInfo(){
+System.out.printf("[%d, %d] \n",xPos, yPos);
+System.out.println("rad: "+rad);
+}
+}
+ 
+public class CircleTest {
+ 
+public static void main(String[] args) throws IOException, ClassNotFoundException {
+ 
+ObjectOutputStream out =
+new ObjectOutputStream(new FileOutputStream("Object.ser"));
+ 
+out.writeObject(new Circle(1,1,2.4));
+out.writeObject(new Circle(2,2,4.8));
+out.writeObject(new String("String implements Serializable"));
+out.close();
+ 
+ObjectInputStream in =
+new ObjectInputStream(new FileInputStream("Object.ser"));
+ 
+Circle c1 = (Circle)in.readObject();
+Circle c2 = (Circle)in.readObject();
+String str = (String)in.readObject();
+in.close();
+ 
+c1.showCircleInfo();
+c2.showCircleInfo();
+System.out.println(str);
+ 
+}
+ 
+}
+ 
+
+>>>>> transient - 직렬화의 대상에서 제외됨.
+>>>> PersonalTest.java
+
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+ 
+class Personal implements Serializable{
+String name;
+transient String secretInfo;
+int age;
+transient int secretNum;
+Personal(String name, String sinfo, int age, int snum){
+this.name = name;
+secretInfo = sinfo;
+this.age = age;
+secretNum = snum;
+}
+ 
+public void showPersonal(){
+System.out.println("name:"+name);
+System.out.println("secretInfo:"+secretInfo);
+System.out.println("age:"+age);
+System.out.println("secretNum:"+secretNum);
+}
+}
+ 
+public class PersonalTest {
+ 
+public static void main(String[] args) throws IOException, ClassNotFoundException {
+Personal p = new Personal("John","baby",3,42);
+p.showPersonal();
+ 
+ObjectOutputStream out =
+new ObjectOutputStream(
+new FileOutputStream("Object2.ser"));
+ 
+out.writeObject(p);
+out.close();
+ 
+ObjectInputStream in = 
+new ObjectInputStream(
+new FileInputStream("Object2.ser"));
+ 
+Personal p2 = (Personal)in.readObject();
+ 
+System.out.println(">>>> 복원된 Personal");
+p2.showPersonal();
+in.close();
+ 
+}
+ 
+}
