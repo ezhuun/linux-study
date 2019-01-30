@@ -1,0 +1,578 @@
+2019.01.30
+
+ * NETWORK 이론
+
+  1) IP Address. . . .  . : 172.16.203.31
+   - 접속 위치를 나타내는 프로토콜
+   - IP는 항구와 같은 위치 정보에 해당하며 컴퓨터를 구분하는 용도로 사용.
+   - Port는 항구에서 짐을 싫어 나르는 부두(port)와 같으며 네트워크로 접속되는 지점
+   - 하나의 IP에 할당된 여러개의 네트워크 프로그램을 구분하는 용도로 사용.
+   - 하나의 포트는 하나의 프로그램과 매핑(연결)됨
+   - IP 하나당 사용 가능한 포트 : 0 ~ 65535 (2Byte)
+   - 알려진 사용할 수 없는 포트
+     20, 21 : FTP, 파일 전송
+     22 : Secure Shell 접속
+     23 : Telnet, 원격 접속
+     25 : SMTP, 메일 전송
+     80 : HTTP, Apache, IIS등 웹서버, 인터넷 웹 페이지 서비스
+     3306 : MySQL 기본 포트, DBMS
+     1521 : Oracle 기본 포트, DBMS
+     8080 : Apache, 기타 웹 서버
+     1433 : MS-SQL 기본 포트, DBMS
+    - 1500번 이하는 시스템이 사용하는 포트가 많음으로 1500번 이상 사용을 권장함.
+
+
+
+ * 네트워크를 지원하는  java.net 패키지의 기본클래스 
+  - URL 클래스 
+   . URL 클래스는 웹상에 존재하는 자원에 접근하거나 네트웍상의 유일한 주소를 나타내기 위한
+     방법을 제공하며, 또한 위치정보를 관리하기 위한 클래스 이다.  
+   . 해당 위치에 스트림을 개설할 수 있다.(openStream() 이용) 
+  - URL 객체 생성후 스트림 개설 
+    URL객체를 생성할때는  MalformedURLException 에러처리를 해야 한다.  
+      try{ 
+           URL uri = new URL("http", "hostname", 80, "default.htm"); 
+           InputStream is = uri.openStream(); 
+
+       }catch(MalformedURLException e){ 
+            e.printStackTrace(); 
+       } 
+
+
+>>>>> URLMain.java 
+/** 
+URL 클래스를 이용하는 방법 
+**/ 
+import java.net.*; 
+import java.io.*; 
+public class URLMain{ 
+public static void main(String args[])  
+throws MalformedURLException, IOException{ 
+URL url  = new  URL("http://www.daum.net"); // 인터넷 주소 객체
+System.out.println("Port: " + url.getPort()); 
+System.out.println("Protocol: " + url.getProtocol()); 
+System.out.println("HostName: " + url.getHost()); 
+System.out.println("File: " + url.getFile()); 
+System.out.println("Ref: " + url.getRef()); 
+String temp; 
+BufferedReader br; 
+br = new BufferedReader(new InputStreamReader(url.openStream(),"UTF-8")); 
+while ((temp = br.readLine()) != null) { 
+System.out.println(temp); 
+} 
+br.close(); 
+} //end of main 
+} //end of URLMain class 
+-----------------------------------------------------------------------------------------------------------
+- InetAddress Class  
+  : IP주소와 관련된 여러 정보 제공 
+  InetAddress의 객체를 생성하기 위해 스태틱의 getByName()메소들 이용한다. 
+>>>>> AddressTest.java 
+import java.net.*; 
+public class AddressTest{ 
+  public static void main(String args[]) throws UnknownHostException { 
+    InetAddress address = InetAddress.getLocalHost();  
+     // getLocalHost() 메소드는 static으로 선언된 클래스 메소드임 
+    System.out.println("로컬 컴퓨터의 이름 : "+address.getHostName()); 
+    System.out.println("로컬 컴퓨터의 IP 주소 : "+address.getHostAddress()); 
+     
+    address = InetAddress.getByName("java.sun.com"); 
+    System.out.println("java.sun.com 도메인 이름과 IP 주소 : "+address); 
+     
+    InetAddress SW[] = InetAddress.getAllByName("naver.com"); 
+    for (int i=0; i<SW.length;i++){
+      System.out.println(SW[i]); 
+    } 
+  } 
+} 
+
+
+
+
+
+ - URLConnection 클래스 
+    : URL을 목표지점으로 하는 네트웍 연결을 위한 작업을 수행함
+
+ - URL객체의 스트림 생성과 URLConnection 객체의 스트림 생성 
+    : URL 객체 
+          URL uri = new URL("http", "hostname", 80, "default.htm"); 
+          InputStream is = uri.openStream(); 
+    : URLConnection 객체  
+         URL uri = URL("http", "hostname", 80, "default.htm"); 
+         URLConnection con = uri.openConnection(); 
+         InputStream is = uri.getInputStream(); 
+
+   또는
+
+        URL uri = URL("http", "hostname", 80, "default.htm"); 
+        URLConnection con = uri.openConnection(); 
+        con.setDoOutput(true); //스트림방향을 출력으로 설정 
+        OutputStream os  = uri.getOutputStream();          
+
+
+
+
+
+* Socket, ServerSocket 
+   - ServerSocket: 클라이언트보다 먼저 실행되어 클라이언트의 접속 요청을 기다리며, 
+     클라이언트가 접속하면 양방향 통신을 할 수 있는 Socket . 객체를 생성한다 
+
+   - Socket: 다른 Socket과 데이터를 송수신 한다.
+
+   - Network 프로그램의 운영순서 
+     ⓐ Server: ServerSocket 생성 
+     ⓑ Server: 포트감시 시작, Client의 접속을 기다림 
+     ⓒ Client: Socket 생성시에 인자 값으로 서버의 IP, PORT를 지정,  서버에 접속 요구 
+     ⓓ Server: Client의 요구를 받아 Socket 객체 생성 
+     ⓔ Server: 생성된 Socket 객체를 이용해 Client에게 데이터를 보냄 
+     ⓕ Client: Socket객체로 데이터를 받고 필요한 데이터를 다시 서버로 전송함 
+
+
+
+
+
+
+
+
+기본적인 소켓통신 실습 
+>>>>> TestServer.java(서버측) 
+import java.io.*; 
+import java.net.*; 
+public class TestServer { 
+    public static void main(String[] args) { 
+        System.out.println("***** 개발자_1 서버 프로그램 작동됨 *****"); 
+        ServerSocket server = null; 
+        try { 
+            //2007 포트로 ServerSocket 생성 
+            server = new ServerSocket(2007); 
+            while(true) {   // 데몬이 되기 위한 무한 루프  
+                System.out.println("클라이언트 접속을 대기중입니다."); 
+                Socket client = server.accept(); //Lock 
+                 
+                InetAddress ia = client.getInetAddress(); 
+                int port = client.getLocalPort();// 접속에 사용된 PORT  
+                String ip = ia.getHostAddress(); // 원격 Client IP 
+                System.out.println("클라이언트 접속:" + " Local Port: "+ port + " IP: " + ip); 
+                //한글을 출력할 수 있습니다. 
+                //Client로 출력할 객체 생성 
+                BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(client.getOutputStream())); 
+             
+                //버퍼에 문자열을 기록함 
+                writer.write("개발자_1 서버에 접속 하신것을 환영 합니다."); 
+             
+                //실제로 Client로 전송함   
+                writer.flush(); 
+                try { 
+                    client.close();  //소켓 닫음 
+                } catch(IOException e) { 
+                    System.out.println("Socket을 닫는중 에러 났습니다." + e.toString()); 
+                } 
+            } 
+        }catch(IOException ioe) { 
+            System.err.println("Exception generated..."); 
+        } finally { 
+            try { 
+                 server.close(); 
+                 System.out.println("서버 작동을 종료합니다."); 
+            } catch(IOException e) { 
+                System.out.println("ServerSocket을 닫는중 에러 났습니다." + e.toString());                          } 
+        } 
+        //아무키나 누를 때까지 대기합니다. 
+        try{ 
+            InputStream is = System.in; 
+            is.read(); 
+        }catch(Exception e){ 
+             
+        } 
+        System.out.println("서버 프로그램 실행을 종료합니다."); 
+    } 
+} 
+
+
+
+
+package day17;
+
+import java.io.*;
+import java.net.*;
+
+public class TestClient {
+
+	public static void main(String[] args) {
+		System.out.println("클라이언트 프로그램 작동.....");
+
+		Socket socket = null;
+
+		try {
+			socket = new Socket(args[0], 2007);
+			System.out.println("서버에 연결 되었습니다...");
+
+			InetAddress ia = socket.getInetAddress();
+			int port = socket.getLocalPort();
+			String ip = ia.getHostAddress();
+
+			System.out.println("접속한 서버 정보 : Local Port : " + port + " IP : " + ip);
+
+			BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			String line = reader.readLine();
+			System.out.println(line);
+		} catch (IOException e) {
+			System.err.println("Exception generated.....");
+		} finally {
+			try {
+				socket.close();
+				System.out.println("서버와의 접속을 종료합니다.");
+			} catch (Exception e) {
+			}
+		}
+
+		InputStream is = System.in;
+
+		try {
+			is.read();
+		} catch (IOException e) {
+		}
+		System.out.println("Client 프로그램 실행을 종료합니다.");
+	}
+
+}
+
+
+
+
+
+[24] Thread 문자열 전송 기반의 채팅
+[01] Thread 기반 Server 
+
+>>>>> ChatServerThread .java
+
+package chatting; 
+ 
+import java.io.BufferedReader; 
+import java.io.BufferedWriter; 
+import java.io.IOException; 
+import java.io.InputStreamReader; 
+import java.io.OutputStreamWriter; 
+import java.net.InetAddress; 
+import java.net.ServerSocket; 
+import java.net.Socket; 
+ 
+public class ChatServerThread { 
+     
+    private Socket socket=null; 
+    private ServerSocket server = null; 
+    public void serverStart(){ 
+        System.out.println("접속자를 기다리는 중입니다."); 
+        try { 
+            server = new ServerSocket(2007); 
+            socket = server.accept(); 
+             
+            InetAddress ia = socket.getInetAddress(); 
+            int port = socket.getLocalPort();// 접속에 사용된 PORT  
+            String ip = ia.getHostAddress(); // 원격 Client IP  
+             
+            System.out.print("클라이언트 접속-Local Port: "+ port); 
+            System.out.println(" Client IP: " + ip); 
+             
+            //데이터를 읽어오는 스레드 
+            ChatServerReadHandler read = new ChatServerReadHandler(socket); 
+            read.start(); 
+            //데이터를 보내는 스레드 
+            ChatServerSendHandler send = new ChatServerSendHandler(socket); 
+            send.start(); 
+        } catch(IOException ioe) { 
+            System.err.println("연결이 되어 있지 않습니다."); 
+        } finally { 
+            try { 
+                server.close(); 
+            } catch(IOException ignored) {} 
+        } 
+         
+    } 
+ 
+    public static void main(String[] args) { 
+        ChatServerThread cs = new ChatServerThread(); 
+        cs.serverStart(); 
+    } 
+} 
+ 
+/** 
+ * 데이터를 읽어옵니다. 
+ * @author stu 
+ * 
+ */ 
+class ChatServerReadHandler extends Thread{ 
+    private Socket socket; 
+    private String line;   //서버로부터 읽어온 문자열 저장     
+ 
+    public ChatServerReadHandler() { 
+        System.out.println("프로그램이 초기화 되지 않았습니다."); 
+    } 
+     
+    public ChatServerReadHandler(Socket socket) { 
+        this.socket = socket;   
+    } 
+ 
+    public void run() { 
+        try { 
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); 
+            while(true){ 
+                line = reader.readLine(); 
+                 
+                if (line == null){  
+                    break; 
+                } 
+                System.out.println("받은글: " + line); 
+                System.out.print("☞ "); 
+            } 
+ 
+        } catch(IOException ignored) { 
+        } finally { 
+            try { 
+                socket.close(); 
+            } catch(IOException ignored) {} 
+        } 
+    } 
+ 
+} 
+ 
+/** 
+ * 데이터를 보냅니다. 
+ * @author stu 
+ * 
+ */ 
+class ChatServerSendHandler extends Thread{ 
+    private Socket socket; 
+    private BufferedWriter writer; 
+    private BufferedReader in;            
+    private String s=""; 
+ 
+    public ChatServerSendHandler() { 
+        System.out.println("프로그램이 초기화 되지 않았습니다."); 
+    } 
+     
+    public ChatServerSendHandler(Socket socket) { 
+        this.socket = socket; 
+        try{ 
+            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); 
+            in = new BufferedReader(new InputStreamReader(System.in)); 
+        } catch (Exception e) { 
+            System.err.println("연결이 되어 있지 않습니다."); 
+        }    
+    } 
+ 
+    public void run() { 
+        try { 
+            while(true) { 
+                System.out.print("☞ "); 
+                s = in.readLine(); //키보드로부터 입력 
+                if(s.equals("999")){ 
+                    break; //종료코드 
+                } 
+                writer.write(s); 
+                writer.newLine();  //줄바뀜 기호가 있어야 BufferedReader의 readLine()이 인식함 
+                writer.flush();    //client로 전송  
+ 
+                //System.out.println("보낸 글:" + s);//입력받은 내용 출력 
+            } 
+        } catch(Exception ignored) { 
+ 
+        } finally { 
+            try { 
+                socket.close(); 
+            } catch(IOException ignored) {} 
+        } 
+    } 
+ 
+} 
+
+
+
+
+[02] Thread 기반 Client
+
+>>>>>  ChatClientThread .java
+package chatting; 
+ 
+import java.io.BufferedReader; 
+import java.io.BufferedWriter; 
+import java.io.IOException; 
+import java.io.InputStreamReader; 
+import java.io.OutputStreamWriter; 
+import java.net.InetAddress; 
+import java.net.Socket; 
+ 
+public class ChatClientThread { 
+    private Socket socket = null; 
+     
+    public void clientStart(String ip){ 
+        System.out.println("클라이언트 프로그램 작동....."); 
+        try { 
+            socket = new Socket(ip, 2007); 
+             
+            InetAddress ia = socket.getInetAddress(); 
+            int local_port = socket.getLocalPort();// 접속에 사용된 PORT 
+            int server_port = socket.getPort();// 접속에 사용된 PORT 
+            String server_ip = ia.getHostAddress(); // 원격 Client IP  
+             
+            System.out.print("클라이언트 접속-Local Port: "+ local_port); 
+            System.out.print(" Server IP: " + server_ip); 
+            System.out.println(" Server PORT: " + server_port);             
+             
+            //데이터를 읽어오는 스레드 
+            ChatClientReadHandler read = new ChatClientReadHandler(socket); 
+            read.start(); 
+            //데이터를 보내는 스레드 
+            ChatClientSendHandler send = new ChatClientSendHandler(socket); 
+            send.start(); 
+             
+        } catch(IOException ioe) { 
+            System.err.println("연결이 되어 있지 않습니다."); 
+        } finally { 
+            try { 
+                if(socket == null){ 
+                    socket.close();                     
+                } 
+            } catch(IOException ignored) {} 
+        } 
+        
+    } 
+ 
+    public static void main(String[] args) { 
+        ChatClientThread cc = new ChatClientThread(); 
+        cc.clientStart(args[0]); 
+    } 
+} 
+ 
+/** 
+ * 데이터를 읽어옵니다. 
+ * @author stu 
+ * 
+ */ 
+class ChatClientReadHandler extends Thread{ 
+    private Socket socket; 
+    private String line;   //서버로부터 읽어온 문자열 저장     
+ 
+    public ChatClientReadHandler() { 
+        System.out.println("프로그램이 초기화 되지 않았습니다."); 
+    } 
+     
+    public ChatClientReadHandler(Socket socket) { 
+        this.socket = socket;   
+    } 
+ 
+    public void run() { 
+        try { 
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream())); 
+            while(true){ 
+                line = reader.readLine(); 
+                 
+                if (line == null){  
+                    break; 
+                } 
+                 
+                System.out.println("받은글: " + line); 
+                System.out.print("☞ "); 
+            } 
+        } catch(IOException ignored) { 
+            System.err.println("연결이 되어 있지 않습니다."); 
+        } finally { 
+            try { 
+                socket.close(); 
+            } catch(IOException ignored) {} 
+        } 
+    } 
+ 
+} 
+ 
+/** 
+ * 데이터를 보냅니다. 
+ * @author stu 
+ * 
+ */ 
+class ChatClientSendHandler extends Thread{ 
+    private Socket socket; 
+    private BufferedWriter writer; 
+    private BufferedReader in;            
+    private String s=""; 
+ 
+    public ChatClientSendHandler() { 
+        System.out.println("프로그램이 초기화 되지 않았습니다."); 
+    } 
+     
+    public ChatClientSendHandler(Socket socket) { 
+        this.socket = socket; 
+        try{ 
+            writer = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream())); 
+            in = new BufferedReader(new InputStreamReader(System.in)); 
+        } catch (Exception e) { 
+            System.err.println("연결이 되어 있지 않습니다."); 
+        }    
+    } 
+ 
+    public void run() { 
+        try { 
+            while(true) { 
+                System.out.print("☞ "); 
+                s = in.readLine(); //키보드로부터 입력 
+                if(s.equals("999")){ 
+                    break; //종료코드 
+                } 
+                writer.write(s); 
+                writer.newLine();  //줄바뀜 기호가 있어야 BufferedReader의 readLine()이 인식함 
+                writer.flush(); 
+                //System.out.println("보낸 글:" + s);//입력받은 내용 출력 
+            } 
+        } catch(Exception ignored) { 
+ 
+        } finally { 
+            try { 
+                socket.close(); 
+            } catch(IOException ignored) {} 
+        } 
+    } 
+ 
+} 
+ 
+
+
+
+
+ * package(Folder, Directory)
+   - 패키지 클래스는 반드시 javac -d  . *.java로 컴파일 할것 
+                                  ↑  ↑ 
+                                  │  │  
+                                  │ 기준 폴더(현재 폴더)  
+                                  │  
+                                  └ 지정된 폴더안에 패키지의 형태로   
+                                     폴더를 만든후 컴파일된 클래스 저장 
+
+CD F:\rfid02\java\source\
+
+F:\rfid02\java\source>javac -d . Star.java 
+
+F:\rfid02\java\source>java corejava.Star 
+
+
+
+
+
+
+
+
+ * 박싱/언박싱 
+   - 기본타입과 참조타입 클래스에서 발생합니다. 
+   - 박싱: 기본타입 -> 참조타입 
+   - 언박싱: 참조타입 -> 기본타입  
+   - 주로 기본타입과 랩퍼클래스에서 이루어 집니다.
+
+
+ * Generics 
+
+   - 객체를 저장하는 기술인 Collection Framework의 단점을 개선한 기능
+   - 클래스나 메소드에 자료형을 매개변수 형식으로 사용할 수 있는 기능. 
+   - Class ArrayList<E>에서 'E'가 있는 곳에는 ArrayList를 선언하고 생성할 때 사용할 실제타입
+   - E는 Element(원소)를 말하며, new ArrayList<String>() 이면 'E'는  'String' 클래스를 가르키며,
+   < > 안의 String은 유형 매개 변수 (type parameter)이다. 
+     따라서 boolean add(Object o) 메소드는 boolean add(String o) 가 된다. 
+   - 'E'는 ArrayList의 인스턴스를 만들때 < > 안에 넣는 타입을 말합니다. 
