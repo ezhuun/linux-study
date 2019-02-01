@@ -1,0 +1,247 @@
+2019.02.01
+
+ * MYSQL 
+
+ * TABLE 생성
+
+CREATE TABLE bbs( 
+    bbsnum  INT          NOT NULL AUTO_INCREMENT PRIMARY KEY, #-2147483648 ~ 2147483647 
+    title   VARCHAR(128) NOT NULL,                            #영숫자 128자, 한글64  
+    content VARCHAR(200) NOT NULL                              
+)ENGINE=MyISAM DEFAULT CHARSET="utf8"; 
+
+
+ * 자료 삽입하기 
+  - 유형1: INSERT INTO 테이블명 VALUES(모든 컬럼의 값 나열); 
+  - 유형2: INSERT INTO 테이블명(인서트할 컬럼명) VALUES(나열된 컬럼의 값 나열); #권장 
+
+ * NULL, NOT NULL 
+   - NULL인 경우는 INSERT시에 값을 입력하지 않아도 됩니다.  
+   - NULL속성일 경우 컬럼값을 입력하지 않으면 "NULL"기호가 값으로 입력됩니다. 
+   - NOT NULL일 경우는 컬럼에 반드시 데이터를 INSERT시에 입력해야 합니다. 
+   - 컬럼의 값이 NULL인 경우는 데이터가 입력된 적이 없다는 뜻입니다
+
+
+
+
+ * MYSQL Explorer
+  - SQL Explorer Plugin Down
+    : https://sourceforge.net/projects/eclipsesql/ -> Donwload
+
+  - sqlexplorer.exe 파일을 실행시켜 설치한다
+
+  - SQL Explorer 설정  
+     Name  : mysql_javauser
+     Driver: MySQL Driver 
+     URL: jdbc:mysql://127.0.0.1:3306/javadb?useUnicode=true&characterEncoding=utf8 
+     Driver Class: org.gjt.mm.mysql.Driver 
+     User Name   : javauser
+     Password    : 1234
+
+==============================================================================================
+※ Eclipse-MYSQL 연동 소스
+※ 드라이버 다운
+    : http://www.mysql.com  - community - connector/j -> download
+※ 이클립스 프로젝트 -> properties -> java build path -> add external jars -> 추가 후 apply
+
+
+package mysql;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class DriverTestMySQL {
+
+	public static void main(String[] args) {
+		Connection con = null;
+
+		try {
+			// JDBC 드라이버 로딩
+			Class.forName("org.gjt.mm.mysql.Driver");
+
+			// MYSQL서버 설정
+			con = DriverManager.getConnection(
+					"jdbc:mysql://127.0.0.1:3306/javadb?useUnicode=true&characterEncoding=utf8", "javauser", "1234");
+			System.out.println("데이터베이스 접속이 성공했습니다");
+
+		} catch (SQLException e) {
+			System.out.println("SQLException:" + e);
+		} catch (Exception e) {
+			System.out.println("Exception:" + e);
+		} finally {
+			if (con != null) {
+				try {
+					con.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+}
+
+==============================================================================================
+※ 레코드를 추가하는 소스 
+
+>>>>> InsertDB.java 
+package test; 
+import java.sql.Connection; 
+import java.sql.DriverManager; 
+import java.sql.SQLException; 
+import java.sql.Statement; 
+public class InsertDB { 
+    public static void main(String args[]) { 
+   String url = "jdbc:mysql://localhost:3306/javadb?useUnicode=true&characterEncoding=utf8"; 
+        Connection con = null; 
+        Statement  stmt = null; 
+        try { 
+            Class.forName("org.gjt.mm.mysql.Driver"); 
+        } catch(Exception e) { 
+            System.err.print(e.toString()); 
+        } 
+        try { 
+            con = DriverManager.getConnection(url,"javauser","1234"); 
+            stmt = con.createStatement(); 
+             
+            String sql = "INSERT INTO address(name,handphone,address) "; 
+            sql = sql + "VALUES('개발자7', '777-777-7777', '한국')"; 
+             
+            //INSERT 쿼리를 먼저 실행한 후 추가된 레코드수를 리턴합니다. 
+            int ret = stmt.executeUpdate(sql); 
+            System.out.println("레코드 " + ret + "개가 추가되었습니다."); 
+             
+        } catch(Exception e) { 
+            System.out.println("Exception: " + e.getMessage()); 
+        } finally{ 
+            try{ 
+                if ( stmt != null){ stmt.close(); } 
+            }catch(Exception e){} 
+            try{ 
+                if ( con != null){ con.close(); } 
+            }catch(Exception e){} 
+        } 
+    } 
+} 
+
+==============================================================================================
+
+
+
+
+PreparedStatement 클래스의 사용 
+    - 자바에서 보낸 쿼리가 데이터베이스의 캐시 영역에 컴파일되어 저장되어 있음으로  
+      같은 쿼리를 실행시 빠른 처리속도를 지원한다. 
+    - 10000개의 레코드 추가시 Statement 클래스 보다 처리속도 약 13초 빠름 
+    - 간결하고 구조적인 쿼리문 작성 가능 
+    - 반복해서 같은 쿼리를 보낼 경우 효과가 큼 
+    - SQL injection 해킹을 방어할 수 있다.
+
+
+1. SELECT의 이용 
+>>>>> SelectPrepDB.java 
+package test; 
+import java.sql.Connection; 
+import java.sql.DriverManager; 
+import java.sql.PreparedStatement; 
+import java.sql.ResultSet; 
+import java.sql.SQLException; 
+
+public class SelectPrepDB { 
+    public static void main(String args[]) { 
+        String url = "jdbc:mysql://localhost:3306/javadb?useUnicode=true&characterEncoding=utf8";
+         Connection con=null; 
+        PreparedStatement  pstmt=null; 
+        ResultSet rs=null; 
+        try { 
+            Class.forName("org.gjt.mm.mysql.Driver"); 
+        } catch(java.lang.ClassNotFoundException e) { 
+            System.err.print("ClassNotFoundException: "); 
+            System.err.println(e.getMessage()); 
+        }    
+        try { 
+            //커넥션 연결 
+            con = DriverManager.getConnection(url,"javauser", "1234"); 
+            String sql = "SELECT addressnum, name, handphone, address "; 
+            sql = sql + " FROM address WHERE addressnum = ?"; 
+            //쿼리 지정  
+            pstmt = con.prepareStatement(sql); 
+            //(물음표의 순번, 적용할 값) 
+            //문자열 지정 pstmt.setString(....) 
+            //첫번째 ?표에 값 6을 지정 
+            pstmt.setInt(1, 6);  
+            rs = pstmt.executeQuery(); 
+            while(rs.next()){ 
+                System.out.println("번호: " + rs.getInt("addressnum")); 
+                System.out.println("성명: " + rs.getString("name")); 
+                System.out.println("전화번호: " + rs.getString("handphone")); 
+                System.out.println("주소: " + rs.getString("address")); 
+                System.out.println("-------------------------------------"); 
+            } 
+         } catch(SQLException e) { 
+            System.out.println("SQLException: " + e.getMessage()); 
+        } finally{ 
+            try{ 
+                if ( rs != null){ rs.close(); } 
+            }catch(Exception e){} 
+            try{ 
+                if ( pstmt != null){ pstmt.close(); } 
+            }catch(Exception e){} 
+            try{ 
+                if ( con != null){ con.close(); } 
+            }catch(Exception e){} 
+        } 
+    } 
+} 
+
+2. INSERT의 이용 
+ - statementd의 PreparedStatement로의 변경 
+
+>>>>> InsertPrepDB.java  
+package test; 
+import java.sql.Connection; 
+import java.sql.DriverManager; 
+import java.sql.PreparedStatement; 
+//import java.sql.ResultSet; 
+import java.sql.SQLException; 
+public class InsertPrepDB { 
+    public static void main(String args[]) { 
+String url = "jdbc:mysql://localhost:3306/javadb?useUnicode=true&characterEncoding=utf8";
+         Connection con=null; 
+        PreparedStatement  pstmt=null; 
+        //ResultSet rs=null; 
+        try { 
+            Class.forName("org.gjt.mm.mysql.Driver"); 
+        } catch(java.lang.ClassNotFoundException e) { 
+            System.err.print("ClassNotFoundException: "); 
+            System.err.println(e.getMessage()); 
+        }    
+        try { 
+            //커넥션 연결 
+            con = DriverManager.getConnection(url,"javauser", "1234"); 
+            String sql = "INSERT INTO address(name, handphone, address) "; 
+            sql = sql + " VALUES(?,?,?)"; 
+            //쿼리 지정  
+            pstmt = con.prepareStatement(sql); 
+            //(물음표의 순번, 적용할 값) 
+            pstmt.setString(1, "개발자9"); 
+            pstmt.setString(2, "999-9999-9999"); 
+            pstmt.setString(3, "베트남"); 
+
+            int ret = pstmt.executeUpdate(); 
+
+            System.out.println("레코드 " + ret + "개가 추가 되었습니다."); 
+             
+        } catch(SQLException e) { 
+            System.out.println("SQLException: " + e.getMessage()); 
+        } finally{ 
+            try{ 
+                if ( pstmt != null){ pstmt.close(); } 
+            }catch(Exception e){} 
+            try{ 
+                if ( con != null){ con.close(); } 
+            }catch(Exception e){} 
+        } 
+    } 
+
+} 
