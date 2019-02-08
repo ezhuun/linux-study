@@ -1,0 +1,441 @@
+2019.02.08
+
+ * mysql-java 연동실습
+
+============================================ Constant ============================================
+package db;
+
+public class Constant {
+	public static final String DRIVER = "org.gjt.mm.mysql.Driver";
+	public static final String URL = "jdbc:mysql://localhost:3306/javadb?useUnicode=true&characterEncoding=utf8";
+	public static final String USER = "javauser";
+	public static final String PASSWORD = "1234";
+}
+
+
+============================================ DBOpen ============================================
+package db;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class DBOpen {
+	static {
+		try {
+			Class.forName(Constant.DRIVER);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static Connection open() {
+
+		Connection con = null;
+
+		try {
+			con = DriverManager.getConnection(Constant.URL, Constant.USER, Constant.PASSWORD);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return con;
+	}
+}
+
+
+============================================ DBClose ============================================
+package db;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+public class DBClose {
+	public static void close(Connection con, PreparedStatement pstmt, ResultSet rs) {
+		try {
+			if (rs != null)
+				rs.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			if (pstmt != null)
+				pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			if (con != null)
+				con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void close(Connection con, PreparedStatement pstmt) {
+		try {
+			if (pstmt != null)
+				pstmt.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		try {
+			if (con != null)
+				con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void close(Connection con) {
+		try {
+			if (con != null)
+				con.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+
+============================================ TeamDTO ============================================
+package team;
+
+public class TeamDTO {
+	private int teamno;
+	private String name;
+	private String phone;
+	private String address;
+	private String gender;
+	private String skill;
+	private String hobby;
+
+	public int getTeamno() {
+		return teamno;
+	}
+
+	public void setTeamno(int teamno) {
+		this.teamno = teamno;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getGender() {
+		return gender;
+	}
+
+	public void setGender(String gender) {
+		this.gender = gender;
+	}
+
+	public String getSkill() {
+		return skill;
+	}
+
+	public void setSkill(String skill) {
+		this.skill = skill;
+	}
+
+	public String getHobby() {
+		return hobby;
+	}
+
+	public void setHobby(String hobby) {
+		this.hobby = hobby;
+	}
+
+}
+
+
+============================================ TeamDAO ============================================
+package team;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
+
+import db.DBClose;
+import db.DBOpen;
+
+public class TeamDAO {
+	public boolean create(TeamDTO dto) {
+		boolean flag = false;
+		Connection con = DBOpen.open();
+		PreparedStatement pstmt = null;
+
+		StringBuffer sql = new StringBuffer();
+		sql.append(" insert into team (name, phone, address,gender, skill, hobby) values ");
+		sql.append(" (?, ?, ?, ?, ?, ?) ");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			pstmt.setString(1, dto.getName());
+			pstmt.setString(2, dto.getPhone());
+			pstmt.setString(3, dto.getAddress());
+			pstmt.setString(4, dto.getGender());
+			pstmt.setString(5, dto.getSkill());
+			pstmt.setString(6, dto.getHobby());
+
+			int cnt = pstmt.executeUpdate();
+			if (cnt > 0) {
+				flag = true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBClose.close(con, pstmt);
+		}
+
+		return flag;
+	}
+
+	public boolean update(TeamDTO dto) {
+		boolean flag = false;
+		Connection con = DBOpen.open();
+		PreparedStatement pstmt = null;
+
+		StringBuffer sql = new StringBuffer();
+		sql.append(" update team set ");
+		sql.append(" name=? ");
+		sql.append(" ,phone=? ");
+		sql.append(" ,address=? ");
+		sql.append(" ,gender=? ");
+		sql.append(" ,skill=? ");
+		sql.append(" ,hobby=? ");
+		sql.append(" where teamno=? ");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			pstmt.setString(1, dto.getName());
+			pstmt.setString(2, dto.getPhone());
+			pstmt.setString(3, dto.getAddress());
+			pstmt.setString(4, dto.getGender());
+			pstmt.setString(5, dto.getSkill());
+			pstmt.setString(6, dto.getHobby());
+			pstmt.setInt(7, dto.getTeamno());
+
+			int cnt = pstmt.executeUpdate();
+			if (cnt > 0) {
+				flag = true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBClose.close(con, pstmt);
+		}
+
+		return flag;
+	}
+
+	public boolean delete(int teamno) {
+		boolean flag = false;
+		Connection con = DBOpen.open();
+		PreparedStatement pstmt = null;
+
+		StringBuffer sql = new StringBuffer();
+		sql.append(" delete from team where teamno=? ");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			pstmt.setInt(1, teamno);
+
+			int cnt = pstmt.executeUpdate();
+			if (cnt > 0) {
+				flag = true;
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBClose.close(con, pstmt);
+		}
+
+		return flag;
+	}
+
+	public TeamDTO read(int teamno) {
+		TeamDTO dto = null;
+		Connection con = DBOpen.open();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+
+		StringBuffer sql = new StringBuffer();
+		sql.append(" select * from team where teamno=? ");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			pstmt.setInt(1, teamno);
+
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				dto = new TeamDTO();
+				dto.setTeamno(rs.getInt("teamno"));
+				dto.setName(rs.getString("name"));
+				dto.setPhone(rs.getString("phone"));
+				dto.setAddress(rs.getString("address"));
+				dto.setGender(rs.getString("gender"));
+				dto.setSkill(rs.getString("skill"));
+				dto.setHobby(rs.getString("hobby"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return dto;
+	}
+
+	public List<TeamDTO> list() {
+		List<TeamDTO> list = new ArrayList<TeamDTO>();
+		Connection con = DBOpen.open();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuffer sql = new StringBuffer();
+		sql.append(" select * from team order by teamno desc ");
+
+		try {
+			pstmt = con.prepareStatement(sql.toString());
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				TeamDTO dto = new TeamDTO();
+				dto.setTeamno(rs.getInt("teamno"));
+				dto.setName(rs.getString("name"));
+				dto.setPhone(rs.getString("phone"));
+				dto.setAddress(rs.getString("address"));
+				dto.setGender(rs.getString("gender"));
+				dto.setSkill(rs.getString("skill"));
+				dto.setHobby(rs.getString("hobby"));
+
+				list.add(dto);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			DBClose.close(con, pstmt, rs);
+		}
+
+		return list;
+	}
+}
+
+
+============================================ TeamTest ============================================
+package team;
+
+import java.util.Iterator;
+import java.util.List;
+
+public class TeamTest {
+
+	public static void main(String[] args) {
+		TeamDAO dao = new TeamDAO();
+		// create(dao);
+		// read(dao);
+		// update(dao);
+		// delete(dao);
+		list(dao);
+
+	}
+
+	private static void list(TeamDAO dao) {
+		List<TeamDTO> list = dao.list();
+		Iterator<TeamDTO> iter = list.iterator();
+
+		while (iter.hasNext()) {
+			TeamDTO dto = iter.next();
+			p(dto);
+			p("============");
+		}
+	}
+
+	private static void delete(TeamDAO dao) {
+		if (dao.delete(7)) {
+			p("삭제 성공");
+		} else {
+			p("삭제 실패");
+		}
+
+	}
+
+	private static void update(TeamDAO dao) {
+		TeamDTO dto = dao.read(8);
+		dto.setName("김길동");
+		dto.setPhone("090-0099-0088");
+		dto.setAddress("북한산");
+		dto.setGender("남자");
+		dto.setSkill("잠자기");
+		dto.setHobby("여행");
+
+		if (dao.update(dto)) {
+			p("업데이트 성공");
+		} else {
+			p("업데이트 실패");
+		}
+	}
+
+	private static void read(TeamDAO dao) {
+		TeamDTO dto = dao.read(1);
+		p(dto);
+	}
+
+	private static void create(TeamDAO dao) {
+		TeamDTO dto = new TeamDTO();
+		dto.setName("홍길동");
+		dto.setPhone("010-0011-0022");
+		dto.setAddress("제주도");
+		dto.setGender("남");
+		dto.setSkill("잠자기");
+		dto.setHobby("여행");
+
+		if (dao.create(dto)) {
+			p("입력 성공");
+		} else {
+			p("입력 실패");
+		}
+	}
+
+	private static void p(String str) {
+		System.out.println(str);
+	}
+
+	private static void p(TeamDTO dto) {
+		if (dto != null) {
+			p("번호:" + dto.getTeamno());
+			p("이름:" + dto.getName());
+			p("전화번호:" + dto.getPhone());
+			p("주소:" + dto.getAddress());
+			p("성별:" + dto.getGender());
+			p("특기:" + dto.getSkill());
+			p("취키:" + dto.getHobby());
+		} else {
+			System.out.println("조회된 데이터가 없습니다");
+		}
+	}
+
+}
