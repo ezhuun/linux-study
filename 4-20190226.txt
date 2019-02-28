@@ -1,0 +1,28 @@
+2019.02.26
+
+http://lectureblue.pe.kr
+tim
+
+
+[01] Script, Servlet의 이해, JDK8.0, TOMCAT 8 Install
+
+* 서버사이드 스크립트 
+   - 서버에 설치된 서블릿 컨테이너(Tomcat, Resin, Weblogic)에서 실행됩니다. 
+   - HTML은 자료를 처리, 저장, 검색하는 기능이 없고 단지 출력하는 기능만 
+     가지고 있습니다. 따라서 이런 데이터를 처리하려면 DBMS(Oracle, MySQL)같은 
+     데이터베이스가 필요하며, 이 데이터베이스에 접속하기위해서  
+     서버스크립트(JSP, PHP, ASP.NET)가 필요합니다. 
+
+   - JSP: SUN의 서버쪽 스크립트 기술, 모든 운영체제 지원, JAVA 기반,  
+     Servlet Container(서버)를 설치해야 실행 할 수 있습니다. 
+      
+   - ASP.NET: MS의 스크립트 기술, MS 운영체제만 지원, C# 기반, 
+     윈도우에 웹서버가 기본적으로 설치되어 있으며, .NET Framework를 
+     설치해야 실행 할 수 있습니다. 
+      
+   - ASP: MS의 서버쪽 스크립트 기술, MS 운영체제만 지원, Visual Basic 기반, 
+     IIS의 asp.dll이 처리하여 HTML로 결과를 생성함, 별다른 서버설치가 필요 없음, 
+     유지보수, 수정이 매우 어렵습니다. 
+
+   - PHP: 서버쪽 공개 스크립트 기술, 모든 운영체제 지원, C 기반,  
+     관련 dll파일이 처리, 속도가 느리고 유지보수, 수정이 매우 어렵습니다. 
